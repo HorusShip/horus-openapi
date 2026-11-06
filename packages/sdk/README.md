@@ -68,7 +68,7 @@ new Horus({
 });
 ```
 
-OAuth access tokens (from the Atlas OAuth flow, see the API's AUTH docs):
+OAuth access tokens (from the Horus OAuth flow, see the API's AUTH docs):
 
 ```ts
 new Horus({
@@ -167,7 +167,7 @@ HORUS_API_KEY=ak_… npm run smoke   # live, read-only checks against production
 ```
 
 To refresh the spec from the backend:
-`cd horus-backend && npx tsx scripts/dumpOpenapi.ts`, then `npm run generate`.
+`curl -o openapi/openapi.json https://horusship.com/api/v1/openapi.json`, then `npm run generate`.
 
 Generation (`scripts/generate.ts`):
 

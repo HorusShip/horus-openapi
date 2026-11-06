@@ -2981,7 +2981,7 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "listings.bulkDelete",
         "method": "POST",
-        "path": "/listings/bulk-delete",
+        "path": "/listings/bulk_delete",
         "params": "body",
         "idempotent": true,
         "paginated": false,
@@ -3264,6 +3264,21 @@ export const CATALOG: readonly OperationInfo[] = [
                 "name": "created_before",
                 "type": "string",
                 "required": false
+            },
+            {
+                "name": "end_reason",
+                "type": "string",
+                "required": false,
+                "description": "Only listings ended for this reason, e.g. `source_out_of_stock`."
+            },
+            {
+                "name": "out_of_stock",
+                "type": "string",
+                "required": false,
+                "enum": [
+                    "true"
+                ],
+                "description": "Shortcut for listings ended because the source went out of stock."
             }
         ],
         "body": null
@@ -4487,6 +4502,18 @@ export const CATALOG: readonly OperationInfo[] = [
                 "type": "string",
                 "required": false,
                 "description": "Search SKU, product name, eBay order id or source order id."
+            },
+            {
+                "name": "buyer_username",
+                "type": "string",
+                "required": false,
+                "description": "Exact eBay buyer username (e.g. to find the sale behind a buyer message)."
+            },
+            {
+                "name": "listing_id",
+                "type": "string",
+                "required": false,
+                "description": "eBay listing (item) id of the sold listing."
             }
         ],
         "body": null
@@ -5051,7 +5078,7 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "sourcing.candidates.markListed",
         "method": "POST",
-        "path": "/sourcing/candidates/{id}/mark-listed",
+        "path": "/sourcing/candidates/{id}/mark_listed",
         "params": "none",
         "idempotent": true,
         "paginated": false,
@@ -5227,7 +5254,7 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "sourcing.feed.claimAndList",
         "method": "POST",
-        "path": "/sourcing/feed/{id}/claim-and-list",
+        "path": "/sourcing/feed/{id}/claim_and_list",
         "params": "body",
         "idempotent": true,
         "paginated": false,
@@ -5408,11 +5435,11 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "sourcing.reverseSearches.create",
         "method": "POST",
-        "path": "/sourcing/reverse-searches",
+        "path": "/sourcing/reverse_searches",
         "params": "body",
         "idempotent": true,
         "paginated": false,
-        "summary": "Find eBay sellers of an Amazon product (reverse image search)",
+        "summary": "Find eBay sellers of an Amazon product",
         "description": "Queued for Horus Desktop / the extension; sellers found become candidates.",
         "tag": "sourcing",
         "scopes": [
@@ -5709,7 +5736,7 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "studio.sampleListings.list",
         "method": "GET",
-        "path": "/studio/sample-listings",
+        "path": "/studio/sample_listings",
         "params": "query",
         "idempotent": false,
         "paginated": false,
@@ -5894,7 +5921,7 @@ export const CATALOG: readonly OperationInfo[] = [
     {
         "id": "studio.templates.setDefault",
         "method": "POST",
-        "path": "/studio/templates/{id}/set-default",
+        "path": "/studio/templates/{id}/set_default",
         "params": "none",
         "idempotent": true,
         "paginated": false,

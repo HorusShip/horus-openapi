@@ -68,12 +68,12 @@ def handle(event: WebhookEvent) -> None:
         print(f"[skip] {'VeRO notice' if msg.is_vero else 'no thread'}: {msg.subject}")
         return
     if not TRACKING_QUESTION.search(f"{msg.subject} {msg.body}"):
-        print(f"[review] not a tracking question from {msg.sender_name}: {msg.body[:120]}")
+        print(f"[review] not a tracking question from {msg.sender}: {msg.body[:120]}")
         return
-    sale = find_sale(msg.listing_id, msg.sender_name)
-    draft = draft_for(sale, msg.sender_name or "") if sale else None
+    sale = find_sale(msg.listing_id, msg.sender)
+    draft = draft_for(sale, msg.sender or "") if sale else None
     if not draft:
-        print(f"[review] no shipped sale found for {msg.sender_name} (listing {msg.listing_id or '?'})")
+        print(f"[review] no shipped sale found for {msg.sender} (listing {msg.listing_id or '?'})")
         return
     if not AUTO_SEND:
         print(f"[draft] thread {msg.thread_id}\n{draft}\n")

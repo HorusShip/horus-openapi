@@ -54,11 +54,11 @@ async function handle(event: HorusEvent): Promise<void> {
     if (event.type !== "message.received") return;
     const msg = event.data.message;
     if (msg.is_vero || !msg.thread_id) return console.log(`[skip] ${msg.is_vero ? "VeRO notice" : "no thread"}: ${msg.subject}`);
-    if (!TRACKING_QUESTION.test(`${msg.subject} ${msg.body}`)) return console.log(`[review] not a tracking question from ${msg.sender_name}: ${msg.body.slice(0, 120)}`);
+    if (!TRACKING_QUESTION.test(`${msg.subject} ${msg.body}`)) return console.log(`[review] not a tracking question from ${msg.sender}: ${msg.body.slice(0, 120)}`);
 
-    const sale = await findSale(msg.listing_id, msg.sender_name);
-    const draft = sale ? draftFor(sale, msg.sender_name ?? "") : null;
-    if (!draft) return console.log(`[review] no shipped sale found for ${msg.sender_name} (listing ${msg.listing_id ?? "?"})`);
+    const sale = await findSale(msg.listing_id, msg.sender);
+    const draft = sale ? draftFor(sale, msg.sender ?? "") : null;
+    if (!draft) return console.log(`[review] no shipped sale found for ${msg.sender} (listing ${msg.listing_id ?? "?"})`);
 
     if (!AUTO_SEND) return console.log(`[draft] thread ${msg.thread_id}\n${draft}\n`);
     await horus.messages.threads.reply(msg.thread_id, { body: draft }, { idempotencyKey: `reply-${msg.id}` });

@@ -49,11 +49,12 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: python/pyproject.toml
-      - run: pip install -e ".[dev]"
+      # Test deps only: the dev extra's code generator needs Python 3.10+.
+      - run: pip install -e . pytest pytest-asyncio respx
       - run: pytest -q
       - name: mypy --strict
         if: matrix.python == '3.13'
-        run: mypy --strict src tests
+        run: pip install -e ".[dev]" && mypy --strict src tests
 
   python-generated:
     name: Python generated code is up to date

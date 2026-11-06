@@ -725,7 +725,7 @@ export function createResources(r: Requester) {
             /**
              * Delete every listing in a group (each is ended on eBay first)
              *
-             * `POST /listings/bulk-delete` · scopes: listings:write
+             * `POST /listings/bulk_delete` · scopes: listings:write
              */
             bulkDelete: (params: BodyOf<"listings.bulkDelete">, options?: RequestOptions): Promise<ResponseOf<"listings.bulkDelete">> =>
                 r.call("listings.bulkDelete", {}, params, options),
@@ -1180,7 +1180,7 @@ export function createResources(r: Requester) {
                 /**
                  * Mark a candidate as listed (list it with `listings.create`)
                  *
-                 * `POST /sourcing/candidates/{id}/mark-listed` · scopes: sourcing:write
+                 * `POST /sourcing/candidates/{id}/mark_listed` · scopes: sourcing:write
                  */
                 markListed: (id: PathOf<"sourcing.candidates.markListed">["id"], options?: RequestOptions): Promise<ResponseOf<"sourcing.candidates.markListed">> =>
                     r.call("sourcing.candidates.markListed", { "id": id }, undefined, options),
@@ -1225,7 +1225,7 @@ export function createResources(r: Requester) {
                  *
                  * Same as `sourcing.feed.claim` then `listings.create` with the item's ASIN; the candidate is marked LISTED.
                  *
-                 * `POST /sourcing/feed/{id}/claim-and-list` · scopes: sourcing:write, listings:write
+                 * `POST /sourcing/feed/{id}/claim_and_list` · scopes: sourcing:write, listings:write
                  */
                 claimAndList: (id: PathOf<"sourcing.feed.claimAndList">["id"], params: BodyOf<"sourcing.feed.claimAndList">, options?: RequestOptions): Promise<ResponseOf<"sourcing.feed.claimAndList">> =>
                     r.call("sourcing.feed.claimAndList", { "id": id }, params, options),
@@ -1257,11 +1257,11 @@ export function createResources(r: Requester) {
             },
             reverseSearches: {
                 /**
-                 * Find eBay sellers of an Amazon product (reverse image search)
+                 * Find eBay sellers of an Amazon product
                  *
                  * Queued for Horus Desktop / the extension; sellers found become candidates.
                  *
-                 * `POST /sourcing/reverse-searches` · scopes: sourcing:write
+                 * `POST /sourcing/reverse_searches` · scopes: sourcing:write
                  */
                 create: (params: BodyOf<"sourcing.reverseSearches.create">, options?: RequestOptions): Promise<ResponseOf<"sourcing.reverseSearches.create">> =>
                     r.call("sourcing.reverseSearches.create", {}, params, options),
@@ -1345,7 +1345,7 @@ export function createResources(r: Requester) {
                 /**
                  * Recent listings to preview templates against (generic samples when there are none)
                  *
-                 * `GET /studio/sample-listings` · scopes: studio:read
+                 * `GET /studio/sample_listings` · scopes: studio:read
                  */
                 list: (params?: QueryOf<"studio.sampleListings.list">, options?: RequestOptions): Promise<ResponseOf<"studio.sampleListings.list">> =>
                     r.call("studio.sampleListings.list", {}, params, options),
@@ -1389,7 +1389,7 @@ export function createResources(r: Requester) {
                 /**
                  * Make this the default template for new listings
                  *
-                 * `POST /studio/templates/{id}/set-default` · scopes: studio:write
+                 * `POST /studio/templates/{id}/set_default` · scopes: studio:write
                  */
                 setDefault: (id: PathOf<"studio.templates.setDefault">["id"], options?: RequestOptions): Promise<ResponseOf<"studio.templates.setDefault">> =>
                     r.call("studio.templates.setDefault", { "id": id }, undefined, options),

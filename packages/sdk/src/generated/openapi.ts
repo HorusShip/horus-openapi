@@ -1240,7 +1240,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/listings/bulk-delete": {
+    "/listings/bulk_delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -2047,7 +2047,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sourcing/candidates/{id}/mark-listed": {
+    "/sourcing/candidates/{id}/mark_listed": {
         parameters: {
             query?: never;
             header?: never;
@@ -2064,7 +2064,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sourcing/reverse-searches": {
+    "/sourcing/reverse_searches": {
         parameters: {
             query?: never;
             header?: never;
@@ -2074,7 +2074,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Find eBay sellers of an Amazon product (reverse image search)
+         * Find eBay sellers of an Amazon product
          * @description Queued for Horus Desktop / the extension; sellers found become candidates.
          */
         post: operations["sourcing.reverseSearches.create"];
@@ -2138,7 +2138,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sourcing/feed/{id}/claim-and-list": {
+    "/sourcing/feed/{id}/claim_and_list": {
         parameters: {
             query?: never;
             header?: never;
@@ -2230,7 +2230,7 @@ export interface paths {
         patch: operations["studio.templates.update"];
         trace?: never;
     };
-    "/studio/templates/{id}/set-default": {
+    "/studio/templates/{id}/set_default": {
         parameters: {
             query?: never;
             header?: never;
@@ -2319,7 +2319,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/studio/sample-listings": {
+    "/studio/sample_listings": {
         parameters: {
             query?: never;
             header?: never;
@@ -4170,6 +4170,7 @@ export interface components {
             created_at: string;
             updated_at: string;
             delisted_at: string | null;
+            end_reason: string | null;
         };
         ListingFailedEvent: components["schemas"]["Event"] & {
             /** @enum {string} */
@@ -4350,46 +4351,66 @@ export interface components {
             /** @enum {string} */
             type?: "message.received";
             data?: {
-                message: components["schemas"]["WebhookMessage"];
+                message: components["schemas"]["Message"];
             };
         };
-        WebhookMessage: {
+        Message: {
             /** @enum {string} */
             object: "message";
             id: string;
+            thread_id: string;
             ebay_account_id: string;
-            thread_id: string | null;
+            /** @enum {string} */
+            direction: "inbound" | "outbound";
+            /** @description BUYER, SELLER, EBAY_SYSTEM or EBAY_VERO. */
             sender_type: string | null;
-            sender_name: string | null;
+            sender: string | null;
             subject: string;
             body: string;
-            ebay_item_id: string | null;
             listing_id: string | null;
-            is_vero: boolean;
+            task_id: string | null;
+            vero: {
+                is_vero: boolean;
+                brand: string | null;
+                action: string | null;
+            };
+            read: boolean;
+            replied: boolean;
+            auto_reply: {
+                sent: boolean;
+                kind: string | null;
+                sent_at: string | null;
+            };
             received_at: string;
         };
         LeadAssignedEvent: components["schemas"]["Event"] & {
             /** @enum {string} */
             type?: "lead.assigned";
             data?: {
-                lead: components["schemas"]["WebhookLead"];
+                lead: components["schemas"]["Lead"];
             };
         };
-        WebhookLead: {
+        Lead: {
             /** @enum {string} */
             object: "lead";
-            /** @description Lead assignment id. */
             id: string;
-            lead_id: string;
-            status: string;
-            competitor_title: string;
-            competitor_price: components["schemas"]["Money"];
-            image_url: string;
+            /** @enum {string} */
+            status: "ASSIGNED" | "CLAIMED" | "DISMISSED";
             asin: string | null;
-            amazon_title: string | null;
-            amazon_price: components["schemas"]["Money"];
-            match_score: number | null;
+            amazon: {
+                title: string | null;
+                price: components["schemas"]["Money"];
+                in_stock: boolean | null;
+            };
+            ebay: {
+                title: string;
+                price: components["schemas"]["Money"];
+            };
+            image_url: string;
+            spread: components["schemas"]["Money"] & unknown;
+            posted_at: string;
             assigned_at: string;
+            claimed_at: string | null;
         };
         SourcingCandidateFoundEvent: components["schemas"]["Event"] & {
             /** @enum {string} */
@@ -4650,6 +4671,7 @@ export interface components {
                 end: string;
             } | null;
             revenue: components["schemas"]["Money"] & unknown;
+            profit: components["schemas"]["Money"] & unknown;
             units_sold: number;
             /** @description LISTED tasks created in the period. */
             listings: number;
@@ -5163,28 +5185,6 @@ export interface components {
             has_more: boolean;
             next_cursor: string | null;
         };
-        Lead: {
-            /** @enum {string} */
-            object: "lead";
-            id: string;
-            /** @enum {string} */
-            status: "ASSIGNED" | "CLAIMED" | "DISMISSED";
-            asin: string | null;
-            amazon: {
-                title: string | null;
-                price: components["schemas"]["Money"];
-                in_stock: boolean | null;
-            };
-            ebay: {
-                title: string;
-                price: components["schemas"]["Money"];
-            };
-            image_url: string;
-            spread: components["schemas"]["Money"] & unknown;
-            posted_at: string;
-            assigned_at: string;
-            claimed_at: string | null;
-        };
         LeadClaim: {
             /** @enum {string} */
             object: "lead_claim";
@@ -5238,6 +5238,8 @@ export interface components {
             items: components["schemas"]["ListingBundleItem"][];
             order_id: string | null;
             delisted_at: string | null;
+            /** @description Why it was ended: source_out_of_stock, source_product_not_found, source_unavailable, source_price_too_high, vero, user… Null while live. */
+            end_reason: string | null;
             created_at: string;
             updated_at: string;
         };
@@ -5364,35 +5366,6 @@ export interface components {
             id: string;
             /** @description Oldest first. */
             messages: components["schemas"]["Message"][];
-        };
-        Message: {
-            /** @enum {string} */
-            object: "message";
-            id: string;
-            thread_id: string;
-            ebay_account_id: string;
-            /** @enum {string} */
-            direction: "inbound" | "outbound";
-            /** @description BUYER, SELLER, EBAY_SYSTEM or EBAY_VERO. */
-            sender_type: string | null;
-            sender: string | null;
-            subject: string;
-            body: string;
-            listing_id: string | null;
-            task_id: string | null;
-            vero: {
-                is_vero: boolean;
-                brand: string | null;
-                action: string | null;
-            };
-            read: boolean;
-            replied: boolean;
-            auto_reply: {
-                sent: boolean;
-                kind: string | null;
-                sent_at: string | null;
-            };
-            received_at: string;
         };
         MessageList: {
             /** @enum {string} */
@@ -13705,6 +13678,10 @@ export interface operations {
                 ids?: string;
                 created_after?: string;
                 created_before?: string;
+                /** @description Only listings ended for this reason, e.g. `source_out_of_stock`. */
+                end_reason?: string;
+                /** @description Shortcut for listings ended because the source went out of stock. */
+                out_of_stock?: "true";
             };
             header?: never;
             path?: never;
@@ -16909,6 +16886,10 @@ export interface operations {
                 sold_before?: string;
                 /** @description Search SKU, product name, eBay order id or source order id. */
                 q?: string;
+                /** @description Exact eBay buyer username (e.g. to find the sale behind a buyer message). */
+                buyer_username?: string;
+                /** @description eBay listing (item) id of the sold listing. */
+                listing_id?: string;
             };
             header?: never;
             path?: never;

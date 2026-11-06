@@ -1,18 +1,18 @@
 /**
- * OAuth for `horus login` (docs/public-api/AUTH.md §4): Atlas device flow
+ * OAuth for `horus login` (docs/public-api/AUTH.md §4): OAuth device flow
  * with the first-party public client, refresh-token rotation and revocation.
  * The issuer is discovered, never assumed: RFC 9728 protected-resource
- * metadata first, then known Atlas issuers (overridable with HORUS_ISSUER).
+ * metadata first, then the default Horus issuer (overridable with HORUS_ISSUER).
  */
 import type { FetchLike } from "@horusship/sdk";
 
 const PROD = {
     clientId: "client_l-jl-kdtR9r2Z-P4XfguzZ-N",
-    issuers: ["https://auth.horusship.com", "https://noble-koala-13-fapi.atlasauth.net"],
+    issuers: ["https://auth.horusship.com"],
 };
 const DEV = {
     clientId: "client_mldnGhMKiY1tnZnF59pZZS5q",
-    issuers: ["https://gentle-narwhal-19-fapi.atlasauth.net"],
+    issuers: [] as string[],
 };
 
 export const SCOPE_AREAS = [

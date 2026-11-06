@@ -642,6 +642,12 @@
               "string",
               "null"
             ]
+          },
+          "end_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -662,7 +668,8 @@
           "is_multi",
           "created_at",
           "updated_at",
-          "delisted_at"
+          "delisted_at",
+          "end_reason"
         ]
       },
       "ListingFailedEvent": {
@@ -1462,7 +1469,7 @@
                 "type": "object",
                 "properties": {
                   "message": {
-                    "$ref": "#/components/schemas/WebhookMessage"
+                    "$ref": "#/components/schemas/Message"
                   }
                 },
                 "required": [
@@ -1473,7 +1480,7 @@
           }
         ]
       },
-      "WebhookMessage": {
+      "Message": {
         "type": "object",
         "properties": {
           "object": {
@@ -1485,22 +1492,27 @@
           "id": {
             "type": "string"
           },
+          "thread_id": {
+            "type": "string"
+          },
           "ebay_account_id": {
             "type": "string"
           },
-          "thread_id": {
-            "type": [
-              "string",
-              "null"
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
             ]
           },
           "sender_type": {
             "type": [
               "string",
               "null"
-            ]
+            ],
+            "description": "BUYER, SELLER, EBAY_SYSTEM or EBAY_VERO."
           },
-          "sender_name": {
+          "sender": {
             "type": [
               "string",
               "null"
@@ -1512,20 +1524,73 @@
           "body": {
             "type": "string"
           },
-          "ebay_item_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "listing_id": {
             "type": [
               "string",
               "null"
             ]
           },
-          "is_vero": {
+          "task_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "vero": {
+            "type": "object",
+            "properties": {
+              "is_vero": {
+                "type": "boolean"
+              },
+              "brand": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "action": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "is_vero",
+              "brand",
+              "action"
+            ]
+          },
+          "read": {
             "type": "boolean"
+          },
+          "replied": {
+            "type": "boolean"
+          },
+          "auto_reply": {
+            "type": "object",
+            "properties": {
+              "sent": {
+                "type": "boolean"
+              },
+              "kind": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sent_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "sent",
+              "kind",
+              "sent_at"
+            ]
           },
           "received_at": {
             "type": "string"
@@ -1534,15 +1599,19 @@
         "required": [
           "object",
           "id",
-          "ebay_account_id",
           "thread_id",
+          "ebay_account_id",
+          "direction",
           "sender_type",
-          "sender_name",
+          "sender",
           "subject",
           "body",
-          "ebay_item_id",
           "listing_id",
-          "is_vero",
+          "task_id",
+          "vero",
+          "read",
+          "replied",
+          "auto_reply",
           "received_at"
         ]
       },
@@ -1564,7 +1633,7 @@
                 "type": "object",
                 "properties": {
                   "lead": {
-                    "$ref": "#/components/schemas/WebhookLead"
+                    "$ref": "#/components/schemas/Lead"
                   }
                 },
                 "required": [
@@ -1575,7 +1644,7 @@
           }
         ]
       },
-      "WebhookLead": {
+      "Lead": {
         "type": "object",
         "properties": {
           "object": {
@@ -1585,23 +1654,15 @@
             ]
           },
           "id": {
-            "type": "string",
-            "description": "Lead assignment id."
-          },
-          "lead_id": {
             "type": "string"
           },
           "status": {
-            "type": "string"
-          },
-          "competitor_title": {
-            "type": "string"
-          },
-          "competitor_price": {
-            "$ref": "#/components/schemas/Money"
-          },
-          "image_url": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "ASSIGNED",
+              "CLAIMED",
+              "DISMISSED"
+            ]
           },
           "asin": {
             "type": [
@@ -1609,38 +1670,84 @@
               "null"
             ]
           },
-          "amazon_title": {
+          "amazon": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "price": {
+                "$ref": "#/components/schemas/Money"
+              },
+              "in_stock": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "title",
+              "price",
+              "in_stock"
+            ]
+          },
+          "ebay": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "price": {
+                "$ref": "#/components/schemas/Money"
+              }
+            },
+            "required": [
+              "title",
+              "price"
+            ]
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "spread": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "description": "eBay price minus Amazon price."
+              }
+            ]
+          },
+          "posted_at": {
+            "type": "string"
+          },
+          "assigned_at": {
+            "type": "string"
+          },
+          "claimed_at": {
             "type": [
               "string",
               "null"
             ]
-          },
-          "amazon_price": {
-            "$ref": "#/components/schemas/Money"
-          },
-          "match_score": {
-            "type": [
-              "number",
-              "null"
-            ]
-          },
-          "assigned_at": {
-            "type": "string"
           }
         },
         "required": [
           "object",
           "id",
-          "lead_id",
           "status",
-          "competitor_title",
-          "competitor_price",
-          "image_url",
           "asin",
-          "amazon_title",
-          "amazon_price",
-          "match_score",
-          "assigned_at"
+          "amazon",
+          "ebay",
+          "image_url",
+          "spread",
+          "posted_at",
+          "assigned_at",
+          "claimed_at"
         ]
       },
       "SourcingCandidateFoundEvent": {
@@ -2760,6 +2867,16 @@
               }
             ]
           },
+          "profit": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "description": "Sum of recorded sale profit in the period, excluding REFUNDED and CANCELLED sales."
+              }
+            ]
+          },
           "units_sold": {
             "type": "integer"
           },
@@ -2864,6 +2981,7 @@
           "period",
           "range",
           "revenue",
+          "profit",
           "units_sold",
           "listings",
           "listing_value",
@@ -5041,112 +5159,6 @@
           "next_cursor"
         ]
       },
-      "Lead": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string",
-            "enum": [
-              "lead"
-            ]
-          },
-          "id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ASSIGNED",
-              "CLAIMED",
-              "DISMISSED"
-            ]
-          },
-          "asin": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "amazon": {
-            "type": "object",
-            "properties": {
-              "title": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "price": {
-                "$ref": "#/components/schemas/Money"
-              },
-              "in_stock": {
-                "type": [
-                  "boolean",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "title",
-              "price",
-              "in_stock"
-            ]
-          },
-          "ebay": {
-            "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "price": {
-                "$ref": "#/components/schemas/Money"
-              }
-            },
-            "required": [
-              "title",
-              "price"
-            ]
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "spread": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Money"
-              },
-              {
-                "description": "eBay price minus Amazon price."
-              }
-            ]
-          },
-          "posted_at": {
-            "type": "string"
-          },
-          "assigned_at": {
-            "type": "string"
-          },
-          "claimed_at": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "object",
-          "id",
-          "status",
-          "asin",
-          "amazon",
-          "ebay",
-          "image_url",
-          "spread",
-          "posted_at",
-          "assigned_at",
-          "claimed_at"
-        ]
-      },
       "LeadClaim": {
         "type": "object",
         "properties": {
@@ -5398,6 +5410,13 @@
               "null"
             ]
           },
+          "end_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Why it was ended: source_out_of_stock, source_product_not_found, source_unavailable, source_price_too_high, vero, user… Null while live."
+          },
           "created_at": {
             "type": "string"
           },
@@ -5425,6 +5444,7 @@
           "items",
           "order_id",
           "delisted_at",
+          "end_reason",
           "created_at",
           "updated_at"
         ]
@@ -5971,141 +5991,6 @@
           "object",
           "id",
           "messages"
-        ]
-      },
-      "Message": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string",
-            "enum": [
-              "message"
-            ]
-          },
-          "id": {
-            "type": "string"
-          },
-          "thread_id": {
-            "type": "string"
-          },
-          "ebay_account_id": {
-            "type": "string"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "inbound",
-              "outbound"
-            ]
-          },
-          "sender_type": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "BUYER, SELLER, EBAY_SYSTEM or EBAY_VERO."
-          },
-          "sender": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "subject": {
-            "type": "string"
-          },
-          "body": {
-            "type": "string"
-          },
-          "listing_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "task_id": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "vero": {
-            "type": "object",
-            "properties": {
-              "is_vero": {
-                "type": "boolean"
-              },
-              "brand": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "action": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "is_vero",
-              "brand",
-              "action"
-            ]
-          },
-          "read": {
-            "type": "boolean"
-          },
-          "replied": {
-            "type": "boolean"
-          },
-          "auto_reply": {
-            "type": "object",
-            "properties": {
-              "sent": {
-                "type": "boolean"
-              },
-              "kind": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "sent_at": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "sent",
-              "kind",
-              "sent_at"
-            ]
-          },
-          "received_at": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "object",
-          "id",
-          "thread_id",
-          "ebay_account_id",
-          "direction",
-          "sender_type",
-          "sender",
-          "subject",
-          "body",
-          "listing_id",
-          "task_id",
-          "vero",
-          "read",
-          "replied",
-          "auto_reply",
-          "received_at"
         ]
       },
       "MessageList": {
@@ -20958,6 +20843,31 @@
             "required": false,
             "name": "created_before",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "description": "Only listings ended for this reason, e.g. `source_out_of_stock`."
+            },
+            "required": false,
+            "description": "Only listings ended for this reason, e.g. `source_out_of_stock`.",
+            "name": "end_reason",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ],
+              "description": "Shortcut for listings ended because the source went out of stock."
+            },
+            "required": false,
+            "description": "Shortcut for listings ended because the source went out of stock.",
+            "name": "out_of_stock",
+            "in": "query"
           }
         ],
         "responses": {
@@ -22263,7 +22173,7 @@
         }
       }
     },
-    "/listings/bulk-delete": {
+    "/listings/bulk_delete": {
       "post": {
         "operationId": "listings.bulkDelete",
         "summary": "Delete every listing in a group (each is ended on eBay first)",
@@ -25770,6 +25680,30 @@
             "description": "Search SKU, product name, eBay order id or source order id.",
             "name": "q",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Exact eBay buyer username (e.g. to find the sale behind a buyer message)."
+            },
+            "required": false,
+            "description": "Exact eBay buyer username (e.g. to find the sale behind a buyer message).",
+            "name": "buyer_username",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "description": "eBay listing (item) id of the sold listing."
+            },
+            "required": false,
+            "description": "eBay listing (item) id of the sold listing.",
+            "name": "listing_id",
+            "in": "query"
           }
         ],
         "responses": {
@@ -29051,7 +28985,7 @@
         }
       }
     },
-    "/sourcing/candidates/{id}/mark-listed": {
+    "/sourcing/candidates/{id}/mark_listed": {
       "post": {
         "operationId": "sourcing.candidates.markListed",
         "summary": "Mark a candidate as listed (list it with `listings.create`)",
@@ -29175,10 +29109,10 @@
         }
       }
     },
-    "/sourcing/reverse-searches": {
+    "/sourcing/reverse_searches": {
       "post": {
         "operationId": "sourcing.reverseSearches.create",
-        "summary": "Find eBay sellers of an Amazon product (reverse image search)",
+        "summary": "Find eBay sellers of an Amazon product",
         "description": "Queued for Horus Desktop / the extension; sellers found become candidates.",
         "tags": [
           "sourcing"
@@ -29770,7 +29704,7 @@
         }
       }
     },
-    "/sourcing/feed/{id}/claim-and-list": {
+    "/sourcing/feed/{id}/claim_and_list": {
       "post": {
         "operationId": "sourcing.feed.claimAndList",
         "summary": "Claim a feed item and list its Amazon product in one call",
@@ -31131,7 +31065,7 @@
         }
       }
     },
-    "/studio/templates/{id}/set-default": {
+    "/studio/templates/{id}/set_default": {
       "post": {
         "operationId": "studio.templates.setDefault",
         "summary": "Make this the default template for new listings",
@@ -31911,7 +31845,7 @@
         }
       }
     },
-    "/studio/sample-listings": {
+    "/studio/sample_listings": {
       "get": {
         "operationId": "studio.sampleListings.list",
         "summary": "Recent listings to preview templates against (generic samples when there are none)",

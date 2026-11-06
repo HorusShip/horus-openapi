@@ -72,7 +72,7 @@ describe("login --api-key", () => {
 });
 
 describe("login (OAuth device flow)", () => {
-    function atlas(tokenReplies: Record<string, unknown>[]): ReturnType<typeof makeCli> {
+    function authServer(tokenReplies: Record<string, unknown>[]): ReturnType<typeof makeCli> {
         return makeCli((c) => {
             if (c.url.pathname.startsWith("/.well-known/oauth-protected-resource")) return new Response("<html>", { status: 200, headers: { "content-type": "text/html" } });
             if (c.url.href === `${ISSUER}/.well-known/openid-configuration`) return json(200, DISCOVERY);
@@ -89,7 +89,7 @@ describe("login (OAuth device flow)", () => {
     }
 
     it("shows the code, polls through pending/slow_down and stores the tokens", async () => {
-        const cli = atlas([{ error: "authorization_pending" }, { error: "slow_down" }, { access_token: "at_1", refresh_token: "rt_1", expires_in: 3600, scope: "openid listings:write" }]);
+        const cli = authServer([{ error: "authorization_pending" }, { error: "slow_down" }, { access_token: "at_1", refresh_token: "rt_1", expires_in: 3600, scope: "openid listings:write" }]);
         expect(await cli.run("login")).toBe(0);
         const device = cli.calls.find((c) => c.url.pathname === "/oauth2/device_authorization");
         expect(form(device)).toEqual({ client_id: "client_l-jl-kdtR9r2Z-P4XfguzZ-N", scope: DEFAULT_SCOPE, resource: "https://horusship.com/api/v1" });
@@ -105,7 +105,7 @@ describe("login (OAuth device flow)", () => {
     });
 
     it("stops on access_denied and stores nothing", async () => {
-        const cli = atlas([{ error: "access_denied", error_description: "The user said no" }]);
+        const cli = authServer([{ error: "access_denied", error_description: "The user said no" }]);
         expect(await cli.run("login", "--no-browser", "--json")).toBe(1);
         expect(JSON.parse(cli.out())).toMatchObject({ error: { code: "access_denied", message: "The user said no" } });
         expect(cli.opened).toEqual([]);
@@ -113,14 +113,14 @@ describe("login (OAuth device flow)", () => {
     });
 
     it("passes --scopes through", async () => {
-        const cli = atlas([{ access_token: "at" }]);
+        const cli = authServer([{ access_token: "at" }]);
         await cli.run("login", "--scopes", "openid offline_access listings:read");
         expect(form(cli.calls.find((c) => c.url.pathname === "/oauth2/device_authorization")).scope).toBe("openid offline_access listings:read");
     });
 
     it("uses the dev client and issuer for a localhost API", () => {
         expect(oauthEnvironment("http://localhost:3000/api/v1", {})).toEqual({
-            resource: "http://localhost:3000/api/v1", clientId: "client_mldnGhMKiY1tnZnF59pZZS5q", issuers: ["https://gentle-narwhal-19-fapi.atlasauth.net"],
+            resource: "http://localhost:3000/api/v1", clientId: "client_mldnGhMKiY1tnZnF59pZZS5q", issuers: ["https://auth.dev.test"],
         });
     });
 

@@ -154,7 +154,7 @@ Columns: **MCP tool** (call it directly), **CLI** (`horus <words> --json`), **HT
 | `listings_end` | `listings end` | `POST /listings/{id}/end` | listings:write |  | End (withdraw) a live eBay listing; the offer is kept so it can be relisted |
 | `listings_relist` | `listings relist` | `POST /listings/{id}/relist` | listings:write |  | Relist an ended (or failed) listing by republishing its eBay offer |
 | `listings_retry` | `listings retry` | `POST /listings/{id}/retry` | listings:write | 202 | Re-queue a FAILED or CANCELLED listing |
-| `listings_bulkDelete` | `listings bulk-delete` | `POST /listings/bulk-delete` | listings:write |  | Delete every listing in a group (each is ended on eBay first) |
+| `listings_bulkDelete` | `listings bulk-delete` | `POST /listings/bulk_delete` | listings:write |  | Delete every listing in a group (each is ended on eBay first) |
 | `listings_prescans_create` | `listings prescans create` | `POST /listings/prescans` | listings:write |  | Pre-scan a Walmart / Target / Best Buy / AliExpress product page |
 | `listings_prescans_get` | `listings prescans get` | `GET /listings/prescans/{platform}/{source_item_id}` | listings:read |  | Get a pre-scanned product (status `pending` until the scrape lands) |
 
@@ -249,12 +249,12 @@ Columns: **MCP tool** (call it directly), **CLI** (`horus <words> --json`), **HT
 | `sourcing_candidates_create` | `sourcing candidates create` | `POST /sourcing/candidates` | sourcing:write | 202 | Submit an eBay item as a candidate; Horus finds its source product and profit |
 | `sourcing_candidates_get` | `sourcing candidates get` | `GET /sourcing/candidates/{id}` | sourcing:read |  | Get a sourcing candidate |
 | `sourcing_candidates_blacklist` | `sourcing candidates blacklist` | `POST /sourcing/candidates/{id}/blacklist` | sourcing:write |  | Blacklist a candidate |
-| `sourcing_candidates_markListed` | `sourcing candidates mark-listed` | `POST /sourcing/candidates/{id}/mark-listed` | sourcing:write |  | Mark a candidate as listed (list it with `listings.create`) |
-| `sourcing_reverseSearches_create` | `sourcing reverse-searches create` | `POST /sourcing/reverse-searches` | sourcing:write | 202 | Find eBay sellers of an Amazon product (reverse image search) |
+| `sourcing_candidates_markListed` | `sourcing candidates mark-listed` | `POST /sourcing/candidates/{id}/mark_listed` | sourcing:write |  | Mark a candidate as listed (list it with `listings.create`) |
+| `sourcing_reverseSearches_create` | `sourcing reverse-searches create` | `POST /sourcing/reverse_searches` | sourcing:write | 202 | Find eBay sellers of an Amazon product |
 | `sourcing_feed_list` | `sourcing feed list` | `GET /sourcing/feed` | sourcing:read |  | The community sourcing feed (minus what I already claimed or hid) |
 | `sourcing_feed_claim` | `sourcing feed claim` | `POST /sourcing/feed/{id}/claim` | sourcing:write |  | Claim a feed item into my candidates |
 | `sourcing_feed_hide` | `sourcing feed hide` | `POST /sourcing/feed/{id}/hide` | sourcing:write |  | Hide a feed item from my feed |
-| `sourcing_feed_claimAndList` | `sourcing feed claim-and-list` | `POST /sourcing/feed/{id}/claim-and-list` | sourcing:write, listings:write | 202 | Claim a feed item and list its Amazon product in one call |
+| `sourcing_feed_claimAndList` | `sourcing feed claim-and-list` | `POST /sourcing/feed/{id}/claim_and_list` | sourcing:write, listings:write | 202 | Claim a feed item and list its Amazon product in one call |
 | `sourcing_config_get` | `sourcing config get` | `GET /sourcing/config` | sourcing:read |  | My sourcing config (incl. margin brackets and badge templates) |
 | `sourcing_config_update` | `sourcing config update` | `PATCH /sourcing/config` | sourcing:write |  | Update my sourcing config |
 | `sourcing_badges_render` | `sourcing badges render` | `POST /sourcing/badges/render` | sourcing:read |  | Render badges over a product image (preview) |
@@ -268,13 +268,13 @@ Columns: **MCP tool** (call it directly), **CLI** (`horus <words> --json`), **HT
 | `studio_templates_get` | `studio templates get` | `GET /studio/templates/{id}` | studio:read |  | Get a Studio template |
 | `studio_templates_update` | `studio templates update` | `PATCH /studio/templates/{id}` | studio:write |  | Update a Studio template (a new layout re-renders the thumbnail) |
 | `studio_templates_delete` | `studio templates delete` | `DELETE /studio/templates/{id}` | studio:write |  | Delete a Studio template |
-| `studio_templates_setDefault` | `studio templates set-default` | `POST /studio/templates/{id}/set-default` | studio:write |  | Make this the default template for new listings |
+| `studio_templates_setDefault` | `studio templates set-default` | `POST /studio/templates/{id}/set_default` | studio:write |  | Make this the default template for new listings |
 | `studio_templates_preview` | `studio templates preview` | `POST /studio/templates/{id}/preview` | studio:write |  | Render the template over sample product images |
 | `studio_badges_list` | `studio badges list` | `GET /studio/badges` | studio:read |  | The built-in badge library (use `id` as a badge layer's badgeId) |
 | `studio_assets_list` | `studio assets list` | `GET /studio/assets` | studio:read |  | List uploaded Studio assets |
 | `studio_assets_create` | `studio assets create` | `POST /studio/assets` | studio:write |  | Upload a Studio asset (PNG / JPEG / WebP max 2048×2048, or SVG) |
 | `studio_assets_delete` | `studio assets delete` | `DELETE /studio/assets/{id}` | studio:write |  | Delete a Studio asset |
-| `studio_sampleListings_list` | `studio sample-listings list` | `GET /studio/sample-listings` | studio:read |  | Recent listings to preview templates against (generic samples when there are none) |
+| `studio_sampleListings_list` | `studio sample-listings list` | `GET /studio/sample_listings` | studio:read |  | Recent listings to preview templates against (generic samples when there are none) |
 
 ## Webhooks
 

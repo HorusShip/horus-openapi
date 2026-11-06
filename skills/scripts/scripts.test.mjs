@@ -1,4 +1,4 @@
-// Tests for the skills tooling. Run: node --test skills/scripts/
+// Tests for the skills tooling. Run: node --test skills/scripts/scripts.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";

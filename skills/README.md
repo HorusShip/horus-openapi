@@ -15,6 +15,9 @@ and `scripts/`. The agent loads a skill only when its description matches the ta
 | [`horus-returns-messages`](horus-returns-messages/SKILL.md) | Returns and refunds, buyer message drafts and replies, VeRO notices. |
 | [`horus-webhooks`](horus-webhooks/SKILL.md) | Endpoints, event choice, signature verification, debugging, replay, simple automations. |
 
+On the hosted MCP server, tools not in the default list are reached through `horus_call` (the
+`horus-operator` skill explains this), or connect with `?toolsets=all`.
+
 The skills work with any of the Horus surfaces and say how to do each step with **MCP tools first**
 (`https://horusship.com/mcp`, tools like `sales_list`), then the **CLI** (`horus … --json`), with the
 SDKs (`@horusship/sdk`, Python `horus`) for code.
@@ -69,7 +72,7 @@ The spec-derived references are generated, and everything is checked against the
 node skills/scripts/generate-references.mjs   # rewrite operations.md + events.md from openapi/openapi.json
 node skills/scripts/validate.mjs              # frontmatter, links, every op/tool/CLI/event name exists
 node skills/scripts/validate.mjs --coverage   # also list operations no skill mentions
-node --test skills/scripts/                   # tests for the tooling
+node --test skills/scripts/scripts.test.mjs  # tests for the tooling
 ```
 
 `--spec https://horusship.com/api/v1/openapi.json` validates against the live API instead of the pinned

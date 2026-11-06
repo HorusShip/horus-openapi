@@ -26,6 +26,19 @@ Use the first of these that is available:
 | **SDK** | You are writing code | TypeScript `@horusship/sdk`, Python `horus` (`horus-sdk` on PyPI) |
 | **HTTP** | Nothing else | `https://horusship.com/api/v1`, header `Authorization: Bearer <key or token>` |
 
+**MCP tool lists are trimmed.** By default the server lists about a dozen everyday tools (`me_get`,
+`sales_list`, `listings_list`, `jobs_get`, `desktop_status_get`, …) plus two meta tools that reach
+every operation:
+
+- `horus_search_operations` `{ query: "ship sale tracking" }` returns matching operations with their tool
+  name, scopes, whether this credential may call them, and their input schema.
+- `horus_call` `{ operation: "sales_ship", arguments: { id, tracking_number, carrier }, idempotency_key }`
+  calls any operation.
+
+So when a skill names a tool you don't see (for example `accounts_verifyBulk`), call it through `horus_call`
+with that name. Don't conclude that Horus can't do it. Connections made with `?toolsets=all` (or
+`?toolsets=sales,listings`) list those tools directly, and `?read_only=true` connections refuse writes.
+
 Set-up details for each surface (adding the MCP server, `horus login`, API keys and scopes) are in
 [references/connecting.md](references/connecting.md).
 

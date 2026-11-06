@@ -30,6 +30,21 @@ Tool names are operationIds with dots replaced by underscores (`sales.ship` → 
 call without the scope it needs fails with `insufficient_scope`. The client can then ask the user to
 approve more scopes.
 
+What the server lists depends on the URL:
+
+| URL | Tools listed |
+|---|---|
+| `https://horusship.com/mcp` | `core` (about 12 everyday read tools) + `horus_search_operations` + `horus_call` |
+| `…/mcp?toolsets=sales,listings` | those areas' tools + the meta tools |
+| `…/mcp?toolsets=all` | every operation as its own tool (~180, so heavy on context) |
+| `…/mcp?toolsets=none` | meta tools only |
+| add `&read_only=true` | only reads; `horus_call` refuses writes |
+
+Lists are filtered to the credential's scopes too. Every operation stays reachable through `horus_call`.
+The server also offers resources (`horus://me`, `horus://dashboard`, `horus://sales/held`,
+`horus://operations/{tool}` for one operation's schema, plus the OpenAPI document) and prompts
+(`daily_check_in`, `triage_held_sales`, `source_to_list`).
+
 ## CLI
 
 ```sh

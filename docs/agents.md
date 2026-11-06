@@ -39,6 +39,15 @@ Tools are named after API operations, with dots turned into underscores:
 | `ebay.accounts.connect` | `ebay_accounts_connect` | `horus ebay accounts connect` |
 
 Tool arguments are the operation's path parameters, query parameters and body fields at the top level.
+
+About 180 tools would flood an agent's context, so by default the server lists a small **core** set
+(the everyday reads) plus two meta tools that reach everything: `horus_search_operations` (find an
+operation by keywords and get its input schema) and `horus_call` (call any operation by name, with an
+optional `idempotency_key`). To list more tools directly, add toolsets to the URL:
+`https://horusship.com/mcp?toolsets=sales,listings` or `?toolsets=all`. Add `&read_only=true` for an
+agent that must never write. The server also has resources (`horus://dashboard`, `horus://sales/held`, …)
+and prompts (`daily_check_in`, `triage_held_sales`, `source_to_list`).
+
 Tools that need a scope your sign-in didn't grant fail with `insufficient_scope`, and the client can ask you
 to approve more.
 

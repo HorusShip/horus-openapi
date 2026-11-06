@@ -1,7 +1,7 @@
 /** The contract between the generated resource methods and the HTTP client. */
 import type { RouteId } from "../generated/routes.js";
 import type { Paginator } from "./pagination.js";
-import type { ItemOf, OperationId, ResponseOf } from "./types.js";
+import type { ItemOf, ListPage, OperationId, ResponseOf } from "./types.js";
 
 /** Per-call overrides. */
 export interface RequestOptions {
@@ -21,5 +21,5 @@ export type PathParams = Record<string, string | number>;
 
 export interface Requester {
     call<K extends OperationId & RouteId>(id: K, path: PathParams, params: unknown, options?: RequestOptions): Promise<ResponseOf<K>>;
-    paginate<K extends OperationId & RouteId>(id: K, path: PathParams, params: unknown, options?: RequestOptions): Paginator<ItemOf<K>, ResponseOf<K> & { object: "list"; data: ItemOf<K>[]; has_more: boolean; next_cursor: string | null }>;
+    paginate<K extends OperationId & RouteId>(id: K, path: PathParams, params: unknown, options?: RequestOptions): Paginator<ItemOf<K>, ListPage<K>>;
 }

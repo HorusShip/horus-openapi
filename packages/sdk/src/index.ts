@@ -5,7 +5,7 @@ export type { AuthOptions, TokenSource } from "./core/auth.js";
 export type { FetchLike } from "./core/http.js";
 export type { RequestOptions } from "./core/requester.js";
 export { Paginator } from "./core/pagination.js";
-export type { BodyOf, ItemOf, OperationId, PageShape, PathOf, QueryOf, ResponseOf } from "./core/types.js";
+export type { BodyOf, ItemOf, ListPage, OperationId, PageShape, PathOf, QueryOf, ResponseOf } from "./core/types.js";
 export type { BodyInfo, HttpMethod, OperationInfo, ParamInfo, ParamType, ParamsLocation, RouteInfo } from "./core/catalog-types.js";
 export { isRetryable } from "./core/retry.js";
 

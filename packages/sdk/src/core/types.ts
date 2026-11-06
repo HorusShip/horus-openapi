@@ -40,6 +40,9 @@ export interface PageShape<Item> {
     next_cursor: string | null;
 }
 
+/** A list operation's response, known to be a page. */
+export type ListPage<K extends OperationId> = ResponseOf<K> & PageShape<ItemOf<K>>;
+
 /** JSON values a request can carry. */
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue | undefined };
 

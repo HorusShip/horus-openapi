@@ -11,7 +11,7 @@ export interface TreeNode {
 
 /** Hand-written members that generated names must never collide with. */
 export const RESERVED_IDS: readonly string[] = ["jobs.wait"];
-export const RESERVED_ROOTS: readonly string[] = ["request"];
+export const RESERVED_ROOTS: readonly string[] = ["request", "call", "paginate", "baseUrl"];
 
 function newNode(): TreeNode {
     return { children: new Map(), op: null };

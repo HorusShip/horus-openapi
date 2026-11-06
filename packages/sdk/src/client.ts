@@ -11,11 +11,13 @@ import type { HttpMethod } from "./core/catalog-types.js";
 import { readEnv } from "./core/env.js";
 import { HorusError } from "./core/errors.js";
 import { HttpClient, type FetchLike, type HttpRequest } from "./core/http.js";
-import type { RequestOptions } from "./core/requester.js";
+import type { Paginator } from "./core/pagination.js";
+import type { PathParams, RequestOptions } from "./core/requester.js";
 import { DEFAULT_MAX_RETRIES } from "./core/retry.js";
 import { OperationRunner } from "./core/runner.js";
-import type { QueryValue } from "./core/types.js";
+import type { ItemOf, ListPage, OperationId, QueryValue, ResponseOf } from "./core/types.js";
 import { createResources, type Resources } from "./generated/resources.js";
+import type { RouteId } from "./generated/routes.js";
 import type { Job } from "./generated/schemas.js";
 import { waitForJob, type WaitForJobOptions } from "./jobs.js";
 import { SDK_VERSION } from "./version.js";
@@ -64,6 +66,7 @@ export class Horus {
 
     readonly baseUrl: string;
     private readonly http: HttpClient;
+    private readonly runner: OperationRunner;
 
     readonly jobs: JobsResource;
 
@@ -76,10 +79,24 @@ export class Horus {
             fetch: resolveFetch(options.fetch),
             defaultHeaders: options.defaultHeaders ?? {},
         }, Credentials.from(options));
-        const r = createResources(new OperationRunner(this.http));
+        this.runner = new OperationRunner(this.http);
+        const r = createResources(this.runner);
         Object.assign(this, r);
         const jobs = r.jobs;
         this.jobs = { ...jobs, wait: (job, opts) => waitForJob((id) => jobs.get(id), job, opts) };
+    }
+
+    /**
+     * Call an operation by its operationId: `horus.call("sales.ship", { id }, { tracking_number })`.
+     * Same as the namespaced method; handy for dynamic dispatch (agents, the CLI).
+     */
+    call<K extends OperationId & RouteId>(id: K, path: PathParams, params?: unknown, options?: RequestOptions): Promise<ResponseOf<K>> {
+        return this.runner.call(id, path, params, options);
+    }
+
+    /** `call()` for cursor-paginated list operations, returning a `Paginator`. */
+    paginate<K extends OperationId & RouteId>(id: K, path: PathParams, params?: unknown, options?: RequestOptions): Paginator<ItemOf<K>, ListPage<K>> {
+        return this.runner.paginate(id, path, params, options);
     }
 
     /**

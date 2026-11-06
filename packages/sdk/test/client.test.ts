@@ -147,3 +147,18 @@ describe("credentials", () => {
         expect(calls).toHaveLength(1);
     });
 });
+
+describe("dynamic dispatch", () => {
+    it("horus.call() runs an operation by operationId", async () => {
+        const { fetch, calls } = mockFetch(json(200, { object: "sale", id: "s1" }));
+        const sale = await client(fetch).call("sales.ship", { id: "s1" }, { tracking_number: "1Z99" });
+        expectTypeOf(sale).toEqualTypeOf<Sale>();
+        expect(`${calls[0]?.method} ${calls[0]?.url.pathname}`).toBe("POST /api/v1/sales/s1/ship");
+        expect(calls[0]?.headers["idempotency-key"]).toBeDefined();
+    });
+
+    it("horus.paginate() iterates a list operation", async () => {
+        const { fetch } = mockFetch(json(200, { object: "list", data: [{ id: "a" }], has_more: false, next_cursor: null }));
+        expect(await client(fetch).paginate("listings.list", {}, { status: "LISTED" }).toArray()).toEqual([{ id: "a" }]);
+    });
+});

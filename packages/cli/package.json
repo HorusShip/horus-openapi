@@ -1,0 +1,33 @@
+{
+  "name": "@horusship/cli",
+  "version": "0.1.0",
+  "description": "Horus command-line interface: drive the Horus API (horusship.com) from a terminal or an agent",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "horus": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "keywords": ["horus", "cli", "ebay", "amazon", "arbitrage"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/horusship/horus-sdk.git",
+    "directory": "packages/cli"
+  },
+  "dependencies": {
+    "@horusship/sdk": "0.1.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsc --noEmit -p tsconfig.json && vitest run",
+    "start": "tsx src/bin.ts"
+  }
+}

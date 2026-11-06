@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Validates the Horus agent skills.
 //
-//   node skills/scripts/validate.mjs [--spec <path|url>] [--coverage]
+//   node skills/scripts/validate.mjs [--spec <path|url>] [--root <skills dir>] [--docs <docs dir>] [--coverage]
 //
 // Checks:
 //   1. Every skill folder has SKILL.md with valid YAML frontmatter: `name` (matches the folder,
@@ -26,12 +26,14 @@ const SDK_HELPERS = new Set(["jobs.wait", "webhooks.verify", "webhooks.unwrap", 
 /** CLI commands that are not API operations. */
 const CLI_BUILTINS = new Set(["login", "logout", "api", "whoami", "config", "help", "version", "completion", "--version", "--help"]);
 
+const argValue = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : undefined; };
+const ROOT = resolve(argValue("root") ?? SKILLS_DIR);
+
 const errors = [];
-const fail = (file, msg) => errors.push(`${relative(SKILLS_DIR, file) || file}: ${msg}`);
+const fail = (file, msg) => errors.push(`${relative(ROOT, file) || file}: ${msg}`);
 
 // ---------- spec index ----------
-const specArg = process.argv.indexOf("--spec");
-const spec = await loadSpec(specArg > 0 ? process.argv[specArg + 1] : DEFAULT_SPEC);
+const spec = await loadSpec(argValue("spec") ?? DEFAULT_SPEC);
 const ops = operations(spec);
 const opIds = new Set(ops.map((o) => o.id));
 const tools = new Set(ops.map((o) => o.tool));
@@ -52,8 +54,8 @@ function walk(dir, out = []) {
     return out;
 }
 
-const docsDir = resolve(SKILLS_DIR, "..", "docs");
-const mdFiles = [...walk(SKILLS_DIR), ...(existsSync(docsDir) ? walk(docsDir) : [])];
+const docsDir = resolve(argValue("docs") ?? resolve(ROOT, "..", "docs"));
+const mdFiles = [...walk(ROOT), ...(existsSync(docsDir) ? walk(docsDir) : [])];
 
 // ---------- 1. frontmatter ----------
 function parseFrontmatter(text) {
@@ -71,10 +73,10 @@ function parseFrontmatter(text) {
     return { fields, bodyLines: text.slice(m[0].length).split(/\r?\n/).length };
 }
 
-const skillDirs = readdirSync(SKILLS_DIR).filter((d) => d !== "scripts" && statSync(join(SKILLS_DIR, d)).isDirectory());
+const skillDirs = readdirSync(ROOT).filter((d) => d !== "scripts" && statSync(join(ROOT, d)).isDirectory());
 for (const dir of skillDirs) {
-    const file = join(SKILLS_DIR, dir, "SKILL.md");
-    if (!existsSync(file)) { fail(join(SKILLS_DIR, dir), "missing SKILL.md"); continue; }
+    const file = join(ROOT, dir, "SKILL.md");
+    if (!existsSync(file)) { fail(join(ROOT, dir), "missing SKILL.md"); continue; }
     const fm = parseFrontmatter(readFileSync(file, "utf8"));
     if (!fm) { fail(file, "missing YAML frontmatter (--- … ---)"); continue; }
     if (fm.error) { fail(file, fm.error); continue; }
@@ -119,10 +121,16 @@ function checkDotted(file, token) {
     else if (looksLikeOp) fail(file, `unknown operationId \`${token}\``);
 }
 
+/** Areas whose names also start ordinary field / object names (`account_id`, `desktop_status`, `studio_template_id`). */
+const AMBIGUOUS_PREFIXES = new Set(["account", "ebay", "desktop", "me", "settings", "sourcing", "studio"]);
+
 function checkTool(file, token) {
     if (tools.has(token)) { seen.ops.add(token.replace(/_/g, ".")); return; }
     const segs = token.split("_");
-    if (segs.length >= 2 && opPrefixes.has(segs[0]) && opVerbs.has(segs[segs.length - 1])) {
+    if (segs.length < 2 || !opPrefixes.has(segs[0])) return;
+    // Unambiguous areas (`sales_…`, `listings_…`): any such token must be a tool. Ambiguous ones only
+    // when they end in an operation verb (`ebay_accounts_frobnicate` is not caught, `ebay_accounts_lst` neither).
+    if (!AMBIGUOUS_PREFIXES.has(segs[0]) || opVerbs.has(segs[segs.length - 1])) {
         fail(file, `unknown MCP tool \`${token}\``);
     }
 }
@@ -152,7 +160,7 @@ function checkSpan(file, span) {
 }
 
 /** Generated from the spec by generate-references.mjs: consistent by construction, not counted for coverage. */
-const GENERATED = new Set(["horus-operator/references/operations.md", "horus-webhooks/references/events.md"].map((p) => resolve(SKILLS_DIR, p)));
+const GENERATED = new Set(["horus-operator/references/operations.md", "horus-webhooks/references/events.md"].map((p) => resolve(ROOT, p)));
 
 for (const file of mdFiles) {
     const text = readFileSync(file, "utf8");

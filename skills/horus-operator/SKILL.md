@@ -73,8 +73,8 @@ Anything that must happen in a browser on the operator's machine (signing in, ch
 reading orders, starting a return) runs on **Horus Desktop**. Those operations return **202** with a
 `job` (or a `listing_batch` / `fulfillment` for listings and eBay orders).
 
-1. Keep the job's `id`. Poll `jobs_get` every 5–10 s (`horus jobs get <id> --json`). The TS SDK
-   has `jobs.wait()` for this.
+1. Keep the job's `id`. Poll `jobs_get` every 5–10 s (`horus jobs get <id> --json`). Both SDKs
+   have `jobs.wait(job)` for this.
 2. `QUEUED`/`CLAIMED`/`RUNNING` mean keep waiting. Sign-ins can take 1–3 minutes and order
    scrapes can take longer. Stop polling after about 5 minutes, tell the user it is still running,
    and give them the job id.

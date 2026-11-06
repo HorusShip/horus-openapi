@@ -63,8 +63,10 @@ client = Horus()  # reads HORUS_API_KEY
 me = client.me.get()
 ```
 
-Both retry safe failures with idempotency keys and page lists for you. The TS SDK has `jobs.wait()`.
-Both verify webhook signatures.
+Both retry 429 / 5xx with one idempotency key per write, page lists for you (iterate the result of a
+`list` call), wait for desktop jobs (`jobs.wait(job)`), and verify webhook signatures (TypeScript
+`verifyWebhook(rawBody, headers, secret)`, Python `client.webhooks.verify(raw_body, headers, secret)`).
+Errors are typed (`DesktopOfflineError`, `RateLimitError`, `PermissionError` / `PermissionDeniedError`, …).
 
 ## Raw HTTP
 

@@ -44,7 +44,7 @@ test("the real skills validate", () => {
 
 test("a good fixture skill passes", () => {
     const root = fixture({
-        "good-skill": "---\nname: good-skill\ndescription: Does a thing. Use when the user asks for the thing.\n---\n\nCall `sales_list`, then `sales.ship`, watch `sale.shipped` / `sale.*`, CLI `horus jobs get <id> --json`. Fields like `session_valid` and codes like `desktop_offline` are fine.\n",
+        "good-skill": "---\nname: good-skill\ndescription: Does a thing. Use when the user asks for the thing.\n---\n\nCall `sales_list`, then `sales.ship`, watch `sale.shipped` / `sale.*`, CLI `horus jobs get <id> --json`. Fields like `session_valid`, `ebay.sku`, files like `auto-reply-webhook.ts` and codes like `desktop_offline` are fine.\n",
     });
     try {
         const r = runValidate(["--root", root, "--docs", join(root, "none")]);

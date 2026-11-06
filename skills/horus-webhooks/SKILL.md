@@ -46,7 +46,8 @@ The handler must:
 - **Verify the signature on the raw body** before parsing (Standard Webhooks: HMAC-SHA256 over
   `"{webhook-id}.{webhook-timestamp}.{body}"`, keyed with the base64-decoded part after `whsec_`).
   Reject timestamps more than 5 min off. Accept if any of the space-separated `v1,` signatures matches
-  (there are two during a secret rotation). Use the SDK (`horus.webhooks.verify(...)`), any
+  (there are two during a secret rotation). Use the SDK (TypeScript `verifyWebhook(rawBody, headers, secret)` from `@horusship/sdk`, Python
+  `client.webhooks.verify(raw_body, headers, secret)`), any
   `standardwebhooks` library, or `scripts/verify_signature.py` / `scripts/verify-signature.mjs` from this skill.
 - **Answer 2xx within 10 s**, then do the work asynchronously. Anything else is retried (30 s, 2 min, 10 min,
   30 min, 1 h, 3 h, 6 h, 12 h). Redirects aren't followed.
@@ -72,7 +73,8 @@ Patterns (full runnable versions are in the SDK repo's `docs/examples/`):
 
 - **Alert relay**: on `desktop.offline`, `sale.held` or `ebay_account.token_expired`, post a message to the user's
   chat. Re-fetch before alerting, because the condition may already be cleared (`desktop.online` arrived).
-- **Auto-reply draft**: on `message.received` with `direction: inbound`, look up the sale and draft a reply.
+- **Auto-reply draft**: on `message.received` from a buyer (`data.message.sender_type`, not `is_vero`), look up the sale (via
+  `listing_id` → `listings_get` → SKU → `sales_list` `q=`) and draft a reply.
   Send automatically only for templates the user approved (e.g. tracking requests on SHIPPED sales), and queue the rest
   for review. Use the idempotency key `reply-<message id>` so replays never double-send.
 - **Listing tracker**: on `listing.failed`, collect `data.error` by reason and summarize daily.

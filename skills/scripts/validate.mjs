@@ -22,6 +22,8 @@ import { SKILLS_DIR, DEFAULT_SPEC, loadSpec, operations, events, cliWords } from
 
 const ALLOWED_KEYS = new Set(["name", "description", "license", "allowed-tools", "metadata", "compatibility"]);
 /** SDK helpers that are not API operations but are documented SDK methods. */
+/** Pre-v2 event names mentioned in migration notes. */
+const LEGACY_EVENTS = new Set(["sale.updated", "order.placed", "order.failed"]);
 const SDK_HELPERS = new Set(["jobs.wait", "webhooks.verify", "webhooks.unwrap", "webhooks.constructEvent"]);
 /** CLI commands that are not API operations. */
 const CLI_BUILTINS = new Set(["login", "logout", "api", "whoami", "config", "help", "version", "completion", "--version", "--help"]);
@@ -40,6 +42,12 @@ const tools = new Set(ops.map((o) => o.tool));
 const cli = new Map(ops.map((o) => [cliWords(o.id), o.id]));
 const opPrefixes = new Set(ops.map((o) => o.id.split(".")[0]));
 const opVerbs = new Set(ops.map((o) => o.id.split(".").pop()));
+const opSecond = new Map();
+for (const o of ops) {
+    const [first, second] = o.id.split(".");
+    if (!opSecond.has(first)) opSecond.set(first, new Set());
+    opSecond.get(first).add(second);
+}
 const eventTypes = new Set(events(spec).map((e) => e.type));
 const eventAreas = new Set([...eventTypes].map((t) => t.split(".")[0]));
 
@@ -114,9 +122,11 @@ function checkDotted(file, token) {
     if (opIds.has(token)) { seen.ops.add(token); return; }
     if (eventTypes.has(token)) { seen.events.add(token); return; }
     if (segs.length === 2 && segs[1] === "*" && eventAreas.has(segs[0])) return;
-    if (SDK_HELPERS.has(token)) return;
+    if (SDK_HELPERS.has(token) || LEGACY_EVENTS.has(token)) return;
     const looksLikeEvent = segs.length === 2 && eventAreas.has(segs[0]) && /^[a-z_*]+$/.test(segs[1]);
-    const looksLikeOp = opPrefixes.has(segs[0]) && segs.every((s) => /^[a-z][a-zA-Z]*$/.test(s));
+    // `ebay.sku` / `account.email` are field paths; only unambiguous areas, or a known sub-resource, count as op ids.
+    const looksLikeOp = opPrefixes.has(segs[0]) && segs.every((s) => /^[a-z][a-zA-Z]*$/.test(s)) &&
+        (!AMBIGUOUS_PREFIXES.has(segs[0]) || (opSecond.get(segs[0])?.has(segs[1] ?? "") ?? false));
     if (looksLikeEvent) fail(file, `unknown webhook event \`${token}\``);
     else if (looksLikeOp) fail(file, `unknown operationId \`${token}\``);
 }
@@ -152,7 +162,7 @@ function checkCli(file, span) {
 
 function checkSpan(file, span) {
     if (/^horus\s+[a-z-]/.test(span.trim())) { checkCli(file, span); return; }
-    for (const m of span.matchAll(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_*][A-Za-z0-9_*]*)+|\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b/g)) {
+    for (const m of span.matchAll(/(?<![\w./-])[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_*][A-Za-z0-9_*]*)+|\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b/g)) {
         const token = m[0];
         if (token.includes(".")) checkDotted(file, token);
         else checkTool(file, token);

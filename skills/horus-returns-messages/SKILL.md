@@ -55,7 +55,9 @@ Auto-return settings (`settings_get` → `returns.*`: `auto_approve`, `max_sale_
   the whole conversation.
 - Find a thread: `messages_threads_list` `q=<buyer, subject>` (`ebay_account_id`, `received_after`).
 - History looks thin? `messages_sync` (202) backfills from eBay. List again a few minutes later.
-- For context, look up the sale: `sales_list` `q=<buyer username or listing title>` → status, tracking.
+- For context, find the sale. `sales_list` can't filter by buyer, so go through the listing: the message's
+  `listing_id` → `listings_get` → its `ebay.sku` → `sales_list` `q=<sku>`, then pick the sale whose
+  `buyer_username` is the thread's `other_party`. That gives you status and tracking.
 
 ### Draft
 

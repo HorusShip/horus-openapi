@@ -87,6 +87,14 @@ every live listing and cancels pending sales on that account.
 - `proxies_list` `status=FAILED`, then `proxies_test` to re-check. Replace dead ones with `proxies_update` or
   `proxies_create` (bulk `host:port:user:pass` strings into a proxy group).
 
+## D. Adding buyer accounts
+
+Only when the user asks and supplies the credentials. Never invent or reuse them. Pick or create the
+group first (`groups_accounts_list`, `groups_accounts_create` `{ name, website }`, one website per group).
+Then `accounts_create` (one) or `accounts_bulkCreate` (up to 500, with per-row `failed[]`). That only
+stores the credentials. Run `accounts_verify` / `accounts_signIn` next. `409 account_exists` means there's already
+one with that website + email.
+
 ## Finish
 
 Re-run `accounts_verifyBulk` on what you touched, then summarize per account: fixed, still

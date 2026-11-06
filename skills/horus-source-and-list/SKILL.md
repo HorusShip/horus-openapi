@@ -48,8 +48,8 @@ and keep failures visible.
 - Confirm the batch first: how many items, which eBay accounts, and the markup.
 - Send an `Idempotency-Key` derived from the batch (for example `list-<group>-<sha1 of sorted items>`) so a
   retried request doesn't double-list.
-- CLI: `horus listings create --group-id … --ebay-account-ids … --items-file asins.txt --json`, or
-  pipe JSON to `horus api POST /listings --data @body.json`.
+- CLI: `horus listings create` with the body fields as flags (`horus listings create --help`), or send
+  the JSON body as-is with `horus api POST /listings --data '<json>'`.
 
 The response is **202** `listing_batch`: `listings[]` (PENDING) and `skipped[]` with `reason`
 `duplicate` (already active on that eBay account, which is fine) or `invalid` (show the `message`).

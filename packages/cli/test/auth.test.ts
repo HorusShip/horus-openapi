@@ -118,9 +118,9 @@ describe("login (OAuth device flow)", () => {
         expect(form(cli.calls.find((c) => c.url.pathname === "/oauth2/device_authorization")).scope).toBe("openid offline_access listings:read");
     });
 
-    it("uses the dev client and issuer for a localhost API", () => {
+    it("uses the dev client for a localhost API (issuer comes from discovery or HORUS_ISSUER)", () => {
         expect(oauthEnvironment("http://localhost:3000/api/v1", {})).toEqual({
-            resource: "http://localhost:3000/api/v1", clientId: "client_mldnGhMKiY1tnZnF59pZZS5q", issuers: ["https://auth.dev.test"],
+            resource: "http://localhost:3000/api/v1", clientId: "client_mldnGhMKiY1tnZnF59pZZS5q", issuers: [],
         });
     });
 

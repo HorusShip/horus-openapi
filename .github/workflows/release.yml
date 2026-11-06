@@ -1,0 +1,75 @@
+name: Release
+
+# Tag to publish:
+#   sdk-v1.2.3   -> @horusship/sdk on npm
+#   cli-v1.2.3   -> @horusship/cli on npm
+#   py-v1.2.3    -> horus-sdk on PyPI
+# npm packages are published with provenance (sigstore, via OIDC) and PyPI
+# with trusted publishing (no token stored). Every built artifact also gets a
+# GitHub build-provenance attestation.
+
+on:
+  push:
+    tags: ["sdk-v*", "cli-v*", "py-v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  npm:
+    if: startsWith(github.ref_name, 'sdk-v') || startsWith(github.ref_name, 'cli-v')
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: Pick package
+        id: pkg
+        run: |
+          if [[ "$GITHUB_REF_NAME" == sdk-v* ]]; then echo "dir=packages/sdk" >> "$GITHUB_OUTPUT"; else echo "dir=packages/cli" >> "$GITHUB_OUTPUT"; fi
+          echo "version=${GITHUB_REF_NAME#*-v}" >> "$GITHUB_OUTPUT"
+      - name: Version matches tag
+        working-directory: ${{ steps.pkg.outputs.dir }}
+        run: test "$(node -p "require('./package.json').version")" = "${{ steps.pkg.outputs.version }}"
+      - name: Pack
+        working-directory: ${{ steps.pkg.outputs.dir }}
+        run: npm pack
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.pkg.outputs.dir }}/*.tgz
+      - name: Publish with provenance
+        working-directory: ${{ steps.pkg.outputs.dir }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  pypi:
+    if: startsWith(github.ref_name, 'py-v')
+    runs-on: ubuntu-latest
+    environment: release
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install build -e ".[dev]"
+      - run: pytest -q
+      - run: python -m build
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: python/dist/*
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist

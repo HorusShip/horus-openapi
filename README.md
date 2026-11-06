@@ -1,13 +1,24 @@
-# Horus SDKs, CLI and agent skills
+# Horus developer tools
 
-Everything here is built from the Horus public API's OpenAPI document
-(`https://horusship.com/api/v1/openapi.json`, source of truth in
-`horus-backend/src/api/public`). Auth: `horus-backend/docs/public-api/AUTH.md`.
+Official SDKs, CLI, MCP server config and agent skills for [Horus](https://horusship.com):
+everything you can do in the Horus app, from code, a terminal or an AI agent.
 
-| Path | Package | What |
+| Path | What | Install |
 |---|---|---|
-| `packages/sdk` | `@horusship/sdk` (npm) | TypeScript SDK |
-| `packages/cli` | `@horusship/cli` (npm, binary `horus`) | CLI |
-| `python` | `horus-sdk` (PyPI, import `horus`) | Python SDK (sync + async) |
-| `skills` | — | Agent skills for operating Horus |
-| `openapi` | — | Pinned copy of the spec the SDKs are generated from |
+| [`packages/sdk`](packages/sdk) | TypeScript SDK | `npm i @horusship/sdk` |
+| [`packages/cli`](packages/cli) | `horus` CLI | `npm i -g @horusship/cli` |
+| [`python`](python) | Python SDK (sync + async) | `pip install horus-sdk` |
+| [`mcp`](mcp) | Hosted MCP server (`https://horusship.com/mcp`) | see README |
+| [`skills`](skills) | Agent skills for operating Horus | see README |
+| [`docs`](docs) | Getting started, auth, webhooks, agents, examples | |
+| [`openapi`](openapi) | The OpenAPI 3.1 spec everything is generated from | |
+
+API reference: https://horusship.com/api/v1/docs · Spec: https://horusship.com/api/v1/openapi.json
+
+Releases are built and published by GitHub Actions with npm provenance, PyPI trusted
+publishing and GitHub build attestations, so every package can be traced to the commit and
+workflow that built it.
+
+## License
+
+MIT
